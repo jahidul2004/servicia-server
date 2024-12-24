@@ -132,6 +132,17 @@ async function run() {
             res.send(reviews);
         });
 
+        // Create router for delete reviews by email and id
+        app.delete("/deleteReview/:email/:id", async (req, res) => {
+            const email = req.params.email;
+            const id = req.params.id;
+            const result = await reviewCollection.deleteOne({
+                email: email,
+                id: id,
+            });
+            res.send(result);
+        });
+
         // Create router for get services by email
         app.get("/services/:email", async (req, res) => {
             try {
