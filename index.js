@@ -31,6 +31,22 @@ async function run() {
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"
         );
+
+        // Create a new database and collection
+
+        const database = client.db("servicia");
+
+        // Collections here
+        const serviceCollection = database.collection("services");
+
+
+        // Create router for add services
+        app.post('/addService', async (req, res) => {
+            const service = req.body;
+            const result = await serviceCollection.insertOne(service);
+            res.send(result);
+        })
+
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
