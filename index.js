@@ -47,6 +47,15 @@ async function run() {
             res.send(result);
         });
 
+        // Create route for delete services
+        app.delete("/deleteService/:id", async (req, res) => {
+            const id = req.params.id;
+            const result = await serviceCollection.deleteOne({
+                _id: new ObjectId(id),
+            });
+            res.send(result);
+        });
+
         // Create router for get services
         app.get("/services", async (req, res) => {
             try {
