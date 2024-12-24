@@ -56,6 +56,17 @@ async function run() {
             res.send(result);
         });
 
+        // Create router for update services
+        app.put("/updateService/:id", async (req, res) => {
+            const id = req.params.id;
+            const updatedService = req.body;
+            const result = await serviceCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updatedService }
+            );
+            res.send(result);
+        });
+
         // Create router for get services
         app.get("/services", async (req, res) => {
             try {
