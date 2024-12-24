@@ -121,6 +121,17 @@ async function run() {
             }
         });
 
+        // Create router for get all reviews
+        app.get("/allReviews", async (req, res) => {
+            try {
+                const reviews = await reviewCollection.find({}).toArray();
+                res.send(reviews);
+            } catch (error) {
+                console.error("Error fetching reviews:", error);
+                res.status(500).send({ message: "Error fetching reviews" });
+            }
+        });
+
         // Create router for get reviews by email
         app.get("/myReviews/:email", async (req, res) => {
             const paramsEmail = req.params.email;
@@ -140,6 +151,17 @@ async function run() {
                 email: email,
                 id: id,
             });
+            res.send(result);
+        });
+
+        // Create router for update reviews
+        app.put("/updateReview/:id", async (req, res) => {
+            const id = req.params.id;
+            const updatedReview = req.body;
+            const result = await reviewCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updatedReview }
+            );
             res.send(result);
         });
 
