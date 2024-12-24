@@ -121,6 +121,17 @@ async function run() {
             }
         });
 
+        // Create router for get reviews by email
+        app.get("/myReviews/:email", async (req, res) => {
+            const paramsEmail = req.params.email;
+            const reviews = await reviewCollection
+                .find({
+                    email: paramsEmail,
+                })
+                .toArray();
+            res.send(reviews);
+        });
+
         // Create router for get services by email
         app.get("/services/:email", async (req, res) => {
             try {
