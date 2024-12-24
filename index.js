@@ -84,6 +84,22 @@ async function run() {
             const result = await reviewCollection.insertOne(review);
             res.send(result);
         });
+
+        // Create router for get reviews by id
+        app.get("/reviews/:id", async (req, res) => {
+            try {
+                const id = req.params.id;
+                const reviews = await reviewCollection
+                    .find({
+                        id: id,
+                    })
+                    .toArray();
+                res.send(reviews);
+            } catch (error) {
+                console.error("Error fetching reviews:", error);
+                res.status(500).send({ message: "Error fetching reviews" });
+            }
+        });
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
