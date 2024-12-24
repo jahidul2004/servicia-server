@@ -38,6 +38,7 @@ async function run() {
 
         // Collections here
         const serviceCollection = database.collection("services");
+        const reviewCollection = database.collection("reviews");
 
         // Create router for add services
         app.post("/addService", async (req, res) => {
@@ -75,6 +76,13 @@ async function run() {
                 console.error("Error fetching service:", error);
                 res.status(500).send({ message: "Error fetching service" });
             }
+        });
+
+        // Create router for add reviews post
+        app.post("/addReview", async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
         });
     } finally {
         // Ensures that the client will close when you finish/error
