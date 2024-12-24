@@ -100,6 +100,22 @@ async function run() {
                 res.status(500).send({ message: "Error fetching reviews" });
             }
         });
+
+        // Create router for get services by email
+        app.get("/services/:email", async (req, res) => {
+            try {
+                const email = req.params.email;
+                const services = await serviceCollection
+                    .find({
+                        serviceCreator: email,
+                    })
+                    .toArray();
+                res.send(services);
+            } catch (error) {
+                console.error("Error fetching services:", error);
+                res.status(500).send({ message: "Error fetching services" });
+            }
+        });
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
