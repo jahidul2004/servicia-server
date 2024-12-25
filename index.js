@@ -218,7 +218,7 @@ async function run() {
         );
 
         // Create router for update reviews
-        app.put("/updateReview/:id", async (req, res) => {
+        app.put("/updateReview/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const updatedReview = req.body;
             const result = await reviewCollection.updateOne(
