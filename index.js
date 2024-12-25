@@ -100,7 +100,7 @@ async function run() {
         });
 
         // Create router for update services
-        app.put("/updateService/:id", async (req, res) => {
+        app.put("/updateService/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const updatedService = req.body;
             const result = await serviceCollection.updateOne(
