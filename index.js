@@ -285,7 +285,7 @@ run().catch(console.dir);
 
 // Routes
 app.get("/", async (req, res) => {
-    res.send("Hello World");
+    res.send("Server is running");
 });
 
 app.listen(port, () => {
