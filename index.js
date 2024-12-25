@@ -142,8 +142,12 @@ async function run() {
         });
 
         // Create router for add reviews post
-        app.post("/addReview", async (req, res) => {
+        app.post("/addReview", verifyToken, async (req, res) => {
             const review = req.body;
+            if (review.email !== req.user.user.email) {
+                res.status(403).send({ message: "Unauthorized Forbidden" });
+                return;
+            }
             const result = await reviewCollection.insertOne(review);
             res.send(result);
         });
