@@ -39,6 +39,7 @@ async function run() {
         // Collections here
         const serviceCollection = database.collection("services");
         const reviewCollection = database.collection("reviews");
+        const userCollection = database.collection("users");
 
         // Create router for add services
         app.post("/addService", async (req, res) => {
@@ -179,6 +180,20 @@ async function run() {
                 console.error("Error fetching services:", error);
                 res.status(500).send({ message: "Error fetching services" });
             }
+        });
+
+        // create route for document count
+        app.get("/countData", async (req, res) => {
+            const serviceCount = await serviceCollection.countDocuments({});
+            const reviewCount = await reviewCollection.countDocuments({});
+            const userCount = await userCollection.countDocuments({});
+
+            const countedData = {
+                serviceCount,
+                reviewCount,
+                userCount,
+            };
+            res.send(countedData);
         });
     } finally {
         // Ensures that the client will close when you finish/error
