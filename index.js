@@ -229,9 +229,13 @@ async function run() {
         });
 
         // Create router for get services by email
-        app.get("/services/:email", async (req, res) => {
+        app.get("/services/:email", verifyToken, async (req, res) => {
             try {
                 const email = req.params.email;
+                if (email !== req.user.user.email) {
+                    res.status(403).send({ message: "Unauthorized Forbidden" });
+                    return;
+                }
                 const services = await serviceCollection
                     .find({
                         serviceCreator: email,
