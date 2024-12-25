@@ -84,14 +84,14 @@ async function run() {
         });
 
         // Create router for add services
-        app.post("/addService", async (req, res) => {
+        app.post("/addService", verifyToken, async (req, res) => {
             const service = req.body;
             const result = await serviceCollection.insertOne(service);
             res.send(result);
         });
 
         // Create route for delete services
-        app.delete("/deleteService/:id", async (req, res) => {
+        app.delete("/deleteService/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const result = await serviceCollection.deleteOne({
                 _id: new ObjectId(id),
