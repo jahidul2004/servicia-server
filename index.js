@@ -11,7 +11,11 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(
     cors({
-        origin: ["http://localhost:5173"],
+        origin: [
+            "http://localhost:5173",
+            "https://servicia-c2208.web.app",
+            "https://servicia-c2208.firebaseapp.com",
+        ],
         credentials: true,
     })
 );
@@ -51,9 +55,9 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"
         );
@@ -78,7 +82,7 @@ async function run() {
 
             res.cookie("token", token, {
                 httpOnly: true,
-                secure: false,
+                secure: process.env.NODE_ENV === "production",
             });
             res.send({ success: true });
         });
