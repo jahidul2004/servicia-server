@@ -195,9 +195,15 @@ async function run() {
         // Create router for delete reviews by email and id
         app.delete(
             "/deleteReview/:email/:id",
+            verifyToken,
 
             async (req, res) => {
                 const email = req.params.email;
+
+                if (email !== req.user.user.email) {
+                    res.status(403).send({ message: "Unauthorized Forbidden" });
+                    return;
+                }
                 const id = req.params.id;
                 const result = await reviewCollection.deleteOne({
                     email: email,
