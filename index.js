@@ -195,6 +195,21 @@ async function run() {
             };
             res.send(countedData);
         });
+
+        // Create router for add users
+        // Check if user already exists
+        app.post("/addUser", async (req, res) => {
+            const user = req.body;
+            const existingUser = await userCollection.findOne({
+                email: user.email,
+            });
+            if (existingUser) {
+                res.status(400).send({ message: "User already exists" });
+                return;
+            }
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        });
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
