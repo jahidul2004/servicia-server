@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
@@ -7,7 +9,31 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+    cors({
+        origin: ["http://localhost:5173"],
+        credentials: true,
+    })
+);
+app.use(cookieParser());
+
+const verifyToken = (req, res, next) => {
+    const token = req?.cookies?.token;
+
+    if (!token) {
+        res.status(401).send({ message: "Unauthorized" });
+        return;
+    }
+    jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+        if (error) {
+            res.status(401).send({ message: "Unauthorized" });
+            return;
+        }
+
+        req.user = decoded;
+        next();
+    });
+};
 
 // Atlas connection
 
@@ -40,6 +66,22 @@ async function run() {
         const serviceCollection = database.collection("services");
         const reviewCollection = database.collection("reviews");
         const userCollection = database.collection("users");
+
+        // Auth related routes
+
+        app.post("/jwt", async (req, res) => {
+            const user = req.body;
+
+            const token = jwt.sign(user, process.env.JWT_SECRET, {
+                expiresIn: "1h",
+            });
+
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: false,
+            });
+            res.send({ success: true });
+        });
 
         // Create router for add services
         app.post("/addService", async (req, res) => {
@@ -134,8 +176,14 @@ async function run() {
         });
 
         // Create router for get reviews by email
-        app.get("/myReviews/:email", async (req, res) => {
+        app.get("/myReviews/:email", verifyToken, async (req, res) => {
             const paramsEmail = req.params.email;
+
+            if (paramsEmail !== req.user.user.email) {
+                res.status(403).send({ message: "Unauthorized Forbidden" });
+                return;
+            }
+
             const reviews = await reviewCollection
                 .find({
                     email: paramsEmail,
@@ -145,15 +193,19 @@ async function run() {
         });
 
         // Create router for delete reviews by email and id
-        app.delete("/deleteReview/:email/:id", async (req, res) => {
-            const email = req.params.email;
-            const id = req.params.id;
-            const result = await reviewCollection.deleteOne({
-                email: email,
-                id: id,
-            });
-            res.send(result);
-        });
+        app.delete(
+            "/deleteReview/:email/:id",
+
+            async (req, res) => {
+                const email = req.params.email;
+                const id = req.params.id;
+                const result = await reviewCollection.deleteOne({
+                    email: email,
+                    id: id,
+                });
+                res.send(result);
+            }
+        );
 
         // Create router for update reviews
         app.put("/updateReview/:id", async (req, res) => {
