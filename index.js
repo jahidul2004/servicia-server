@@ -77,7 +77,7 @@ async function run() {
             const user = req.body;
 
             const token = jwt.sign(user, process.env.JWT_SECRET, {
-                expiresIn: "1h",
+                expiresIn: "20h",
             });
 
             res.cookie("token", token, {
@@ -87,6 +87,17 @@ async function run() {
                     process.env.NODE_ENV === "production" ? "none" : "strict",
             });
             res.send({ success: true });
+        });
+
+        // Logout Route
+        app.post("/logout", (req, res) => {
+            res.clearCookie("token", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite:
+                    process.env.NODE_ENV === "production" ? "none" : "strict",
+            });
+            res.send({ message: "Logout successful" });
         });
 
         // Create router for add services
@@ -150,10 +161,6 @@ async function run() {
         // Create router for add reviews post
         app.post("/addReview", verifyToken, async (req, res) => {
             const review = req.body;
-            if (review.email !== req.user.user.email) {
-                res.status(403).send({ message: "Unauthorized Forbidden" });
-                return;
-            }
             const result = await reviewCollection.insertOne(review);
             res.send(result);
         });
@@ -189,11 +196,6 @@ async function run() {
         app.get("/myReviews/:email", verifyToken, async (req, res) => {
             const paramsEmail = req.params.email;
 
-            if (paramsEmail !== req.user.user.email) {
-                res.status(403).send({ message: "Unauthorized Forbidden" });
-                return;
-            }
-
             const reviews = await reviewCollection
                 .find({
                     email: paramsEmail,
@@ -209,11 +211,6 @@ async function run() {
 
             async (req, res) => {
                 const email = req.params.email;
-
-                if (email !== req.user.user.email) {
-                    res.status(403).send({ message: "Unauthorized Forbidden" });
-                    return;
-                }
                 const id = req.params.id;
                 const result = await reviewCollection.deleteOne({
                     email: email,
@@ -238,10 +235,6 @@ async function run() {
         app.get("/services/:email", verifyToken, async (req, res) => {
             try {
                 const email = req.params.email;
-                if (email !== req.user.user.email) {
-                    res.status(403).send({ message: "Unauthorized Forbidden" });
-                    return;
-                }
                 const services = await serviceCollection
                     .find({
                         serviceCreator: email,
@@ -292,6 +285,13 @@ run().catch(console.dir);
 // Routes
 app.get("/", async (req, res) => {
     res.send("Server is running");
+});
+
+// // Middleware to set Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers
+app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+    next();
 });
 
 app.listen(port, () => {
