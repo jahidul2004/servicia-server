@@ -20,6 +20,12 @@ app.use(
     })
 );
 app.use(cookieParser());
+// // Middleware to set Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers
+app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+    next();
+});
 
 const verifyToken = (req, res, next) => {
     const token = req?.cookies?.token;
@@ -285,13 +291,6 @@ run().catch(console.dir);
 // Routes
 app.get("/", async (req, res) => {
     res.send("Server is running");
-});
-
-// // Middleware to set Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers
-app.use((req, res, next) => {
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-    next();
 });
 
 app.listen(port, () => {
